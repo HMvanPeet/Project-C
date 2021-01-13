@@ -4,7 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>6a0534b9-7458-4d66-b70b-efe1eaff643a</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>machinelearning.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,7 +22,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="machinelearning.py" />
+    <Compile Include="autograder.py" />
+    <Compile Include="backend.py" />
+    <Compile Include="models.py" />
+    <Compile Include="nn.py" />
+    <Compile Include="submission_autograder.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
