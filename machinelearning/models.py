@@ -43,18 +43,14 @@ class PerceptronModel(object):
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE ***"
-        mistakes = 1
-        t = 0
-        while mistakes > 0:
-            i = 0
-            mistakes = 0
-            for data in dataset.x:
-                if self.get_prediction != dataset.y[i]:
-                    t += 1
-                i += 1
-        print(dataset.y[0])
-        print(self.get_prediction(dataset.x))
-        print(t)
+        mistakes = True
+        while mistakes:
+            mistakes = False
+            for x, y in dataset.iterate_once(1):
+                if self.get_prediction(x) != nn.as_scalar(y):
+                    mistakes = True
+                    #the multiplier is a product of the error * learning rate
+                    self.w.update(x, (nn.as_scalar(y) - self.get_prediction(x)) * 0.5)
 
 class RegressionModel(object):
     """
