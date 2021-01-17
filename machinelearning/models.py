@@ -61,6 +61,11 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        input = 1
+        neurons = 100
+        output = 1
+        self.w1 = nn.Parameter(input, neurons)
+        self.w2 = nn.Parameter(neurons, output)
 
     def run(self, x):
         """
@@ -72,6 +77,7 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        return nn.Linear(nn.ReLU(nn.Linear(x, self.w1)), self.w2)
 
     def get_loss(self, x, y):
         """
@@ -84,12 +90,26 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        #self.loss = nn.SquareLoss(self.run(x), y)
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        halfset = int(len(dataset.x) / 2)
+        multiplier = 0.5
+        for x, y in dataset.iterate_once(len(dataset.x)):
+            loss = self.get_loss(x, y)
+        while nn.as_scalar(loss) > 0.02:
+            for x, y in dataset.iterate_once(halfset):
+                grad_w1 = nn.gradients(loss, self.w1)
+                grad_w2 = nn.gradients(loss, self.w2)
+                self.w1.update(grad_w1, multiplier)
+                self.w2.update(grad_w2, multiplier)
+            for x, y in dataset.iterate_once(len(dataset.x)):
+                loss = self.get_loss(x, y)
 
 class DigitClassificationModel(object):
     """
@@ -217,3 +237,8 @@ class LanguageIDModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+
+class NeuralNetwork:
+
+    def __init__(self, neurons=20, layers=2):
+        iets = layers
