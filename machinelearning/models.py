@@ -50,7 +50,7 @@ class PerceptronModel(object):
                 if self.get_prediction(x) != nn.as_scalar(y):
                     mistakes = True
                     #the multiplier is a product of the error * learning rate
-                    self.w.update(x, (nn.as_scalar(y) - self.get_prediction(x)) * 0.5)
+                    self.w.update(x, nn.as_scalar(y))
 
 class RegressionModel(object):
     """
@@ -99,15 +99,17 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
         halfset = int(len(dataset.x) / 2)
-        multiplier = 0.5
+        multiplier = 0.001
         for x, y in dataset.iterate_once(len(dataset.x)):
             loss = self.get_loss(x, y)
         while nn.as_scalar(loss) > 0.02:
             for x, y in dataset.iterate_once(halfset):
-                grad_w1 = nn.gradients(loss, self.w1)
-                grad_w2 = nn.gradients(loss, self.w2)
-                self.w1.update(grad_w1, multiplier)
-                self.w2.update(grad_w2, multiplier)
+                listw1 = [self.w1]
+                listw2 = [self.w2]
+                grad_w1 = nn.gradients(self.get_loss(x, y), listw1)
+                grad_w2 = nn.gradients(self.get_loss(x, y), listw2)
+                self.w1.update(grad_w1[0], multiplier)
+                self.w2.update(grad_w2[0], multiplier)
             for x, y in dataset.iterate_once(len(dataset.x)):
                 loss = self.get_loss(x, y)
 
