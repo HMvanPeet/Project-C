@@ -49,7 +49,7 @@ class PerceptronModel(object):
             for x, y in dataset.iterate_once(1):
                 if self.get_prediction(x) != nn.as_scalar(y):
                     mistakes = True
-                    #the multiplier is a product of the error * learning rate
+                    #the multiplier is the label (1 or -1) of a incorrectly predicted point
                     self.w.update(x, nn.as_scalar(y))
 
 class RegressionModel(object):
@@ -61,8 +61,9 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        #1 input because there is a single x, 1 hidden layer of 100 hidden neurons, 1 output
         input = 1
-        neurons = 50
+        neurons = 100
         output = 1
         self.w1 = nn.Parameter(input, neurons)
         self.w2 = nn.Parameter(neurons, output)
@@ -79,6 +80,7 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        #Created from equation f(x) = ReLU(x * w1 + b1) * w2 + b2
         return nn.AddBias(nn.Linear(nn.ReLU(nn.AddBias(nn.Linear(x, self.w1), self.b1)), self.w2), self.b2)
 
     def get_loss(self, x, y):
@@ -101,8 +103,10 @@ class RegressionModel(object):
         "*** YOUR CODE HERE ***"
         halfset = int(len(dataset.x) / 2)
         multiplier = -0.05
+        #Calculate initial loss in case that it accidentally is correct before training
         for x, y in dataset.iterate_once(len(dataset.x)):
             loss = self.get_loss(x, y)
+        #As long as the loss is too great, keep learning
         while nn.as_scalar(loss) > 0.02:
             for x, y in dataset.iterate_once(halfset):
                 grad_b1, grad_b2, grad_w1, grad_w2 = nn.gradients(self.get_loss(x, y), [self.b1, self.b2, self.w1, self.w2])
@@ -110,6 +114,7 @@ class RegressionModel(object):
                 self.w2.update(grad_w2, multiplier)
                 self.b1.update(grad_b1, multiplier)
                 self.b2.update(grad_b2, multiplier)
+            #At the end of the while-loop, calculate new loss
             for x, y in dataset.iterate_once(len(dataset.x)):
                 loss = self.get_loss(x, y)
 
@@ -130,6 +135,17 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        #784 input (1 for each pixel), 2 hidden layers of 200 hidden neurons each, 10 outputs
+        input = 784
+        neurons = 400
+        output = 10
+        hidden_layer_size = int(neurons / 2)
+        self.w1 = nn.Parameter(input, hidden_layer_size)
+        self.w2 = nn.Parameter(hidden_layer_size, hidden_layer_size)
+        self.w3 = nn.Parameter(hidden_layer_size, output)
+        self.b1 = nn.Parameter(1, hidden_layer_size)
+        self.b2 = nn.Parameter(1, hidden_layer_size)
+        self.b3 = nn.Parameter(1, output)
 
     def run(self, x):
         """
@@ -146,6 +162,8 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        #Created from equation f(x) = ReLU(ReLU(x * w1 + b1) * w2 + b2) * w3 + b3
+        return nn.AddBias(nn.Linear(nn.ReLU(nn.AddBias(nn.Linear(nn.ReLU(nn.AddBias(nn.Linear(x, self.w1), self.b1)), self.w2), self.b2)), self.w3), self.b3)
 
     def get_loss(self, x, y):
         """
@@ -161,12 +179,25 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        return nn.SoftmaxLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        #Train in batches of 100. While accuracy is lower than 97%, keep training
+        partset = int(len(dataset.x) / 600)
+        multiplier = -0.3
+        while dataset.get_validation_accuracy() < 0.97:
+            for x, y in dataset.iterate_once(partset):
+                grad_b1, grad_b2, grad_b3, grad_w1, grad_w2, grad_w3 = nn.gradients(self.get_loss(x, y), [self.b1, self.b2, self.b3, self.w1, self.w2, self.w3])
+                self.w1.update(grad_w1, multiplier)
+                self.w2.update(grad_w2, multiplier)
+                self.w3.update(grad_w3, multiplier)
+                self.b1.update(grad_b1, multiplier)
+                self.b2.update(grad_b2, multiplier)
+                self.b3.update(grad_b3, multiplier)
 
 class LanguageIDModel(object):
     """
