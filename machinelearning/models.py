@@ -207,6 +207,7 @@ class LanguageIDModel(object):
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
     """
+    #Extra explanation: https://iamtrask.github.io/2015/11/15/anyone-can-code-lstm/
     def __init__(self):
         # Our dataset contains words from five different languages, and the
         # combined alphabets of the five languages contain a total of 47 unique
@@ -214,9 +215,18 @@ class LanguageIDModel(object):
         # You can refer to self.num_chars or len(self.languages) in your code
         self.num_chars = 47
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
+        hidden_layer_size = 100
 
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.w1 = nn.Parameter(self.num_chars, hidden_layer_size)
+        self.w2 = nn.Parameter(hidden_layer_size, len(self.languages))
+        self.wh = nn.Parameter(hidden_layer_size, hidden_layer_size)
+
+        #I didn't need biases
+        #self.b1 = nn.Parameter(1, hidden_layer_size)
+        #self.b2 = nn.Parameter(1, len(self.languages))
+        #self.bh = nn.Parameter(1, hidden_layer_size)
 
     def run(self, xs):
         """
@@ -248,6 +258,16 @@ class LanguageIDModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        #Initializes a hidden state (h) for the first "NN"
+        h = nn.ReLU(nn.Linear(xs[0], self.w1))
+        wordlength = len(xs)
+
+        #Iterates through all letters to update h
+        for i in range(1, wordlength):
+            h = nn.Add(nn.ReLU(nn.Linear(xs[i], self.w1)), nn.ReLU(nn.Linear(h, self.wh)))
+        #Use h of the last NN to calculate the prediction
+        output = nn.Linear(h, self.w2)
+        return output
 
     def get_loss(self, xs, y):
         """
@@ -264,9 +284,24 @@ class LanguageIDModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        #Use a simple SoftMax calculation to find the loss
+        return nn.SoftmaxLoss(self.run(xs), y)
+
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        #Create batches of 500 elements to train with
+        partset = int(len(dataset.train_x) / 35)
+        multiplier = -0.5
+
+        #While the accuracy is too low on the validation set, keep looping the training
+        #A higher accuracy is needed for the validation set, because it is possible that the accuracy of the testset is lower
+        while dataset.get_validation_accuracy() < 0.87:
+            for x, y in dataset.iterate_once(partset):
+                grad_w1, grad_w2, grad_wh = nn.gradients(self.get_loss(x, y), [self.w1, self.w2, self.wh])
+                self.w1.update(grad_w1, multiplier)
+                self.w2.update(grad_w2, multiplier)
+                self.wh.update(grad_wh, multiplier)
