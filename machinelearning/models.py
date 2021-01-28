@@ -1,4 +1,5 @@
 import nn
+from datetime import datetime
 
 class PerceptronModel(object):
     def __init__(self, dimensions):
@@ -43,6 +44,7 @@ class PerceptronModel(object):
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE ***"
+        start = datetime.now()
         mistakes = True
         while mistakes:
             mistakes = False
@@ -51,6 +53,8 @@ class PerceptronModel(object):
                     mistakes = True
                     #the multiplier is the label (1 or -1) of a incorrectly predicted point
                     self.w.update(x, nn.as_scalar(y))
+        time = datetime.now() - start
+        print(f"Training took {time} seconds")
 
 class RegressionModel(object):
     """
@@ -101,6 +105,7 @@ class RegressionModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        start = datetime.now()
         halfset = int(len(dataset.x) / 2)
         multiplier = -0.05
         #Calculate initial loss in case that it accidentally is correct before training
@@ -117,6 +122,8 @@ class RegressionModel(object):
             #At the end of the while-loop, calculate new loss
             for x, y in dataset.iterate_once(len(dataset.x)):
                 loss = self.get_loss(x, y)
+        time = datetime.now() - start
+        print(f"Training took {time} seconds")
 
 class DigitClassificationModel(object):
     """
@@ -186,6 +193,7 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        start = datetime.now()
         #Train in batches of 100. While accuracy is lower than 97%, keep training
         partset = int(len(dataset.x) / 600)
         multiplier = -0.3
@@ -198,6 +206,8 @@ class DigitClassificationModel(object):
                 self.b1.update(grad_b1, multiplier)
                 self.b2.update(grad_b2, multiplier)
                 self.b3.update(grad_b3, multiplier)
+        time = datetime.now() - start
+        print(f"Training took {time} seconds")
 
 class LanguageIDModel(object):
     """
@@ -293,6 +303,7 @@ class LanguageIDModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        start = datetime.now()
         #Create batches of 500 elements to train with
         partset = int(len(dataset.train_x) / 35)
         multiplier = -0.5
@@ -305,3 +316,5 @@ class LanguageIDModel(object):
                 self.w1.update(grad_w1, multiplier)
                 self.w2.update(grad_w2, multiplier)
                 self.wh.update(grad_wh, multiplier)
+        time = datetime.now() - start
+        print(f"Training took {time} seconds")
